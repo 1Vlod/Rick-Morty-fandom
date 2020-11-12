@@ -1,28 +1,63 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+  <v-app id="inspire">
+    <NavBar/>
+
+    <v-main>
+      <v-container>
+        <v-row>
+          <v-col cols="4" class="mx-auto">
+            <v-text-field label="something" v-model="query"></v-text-field>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col
+            v-for="character in characters"
+            :key="character.id"
+            cols="4"
+          >
+            <CardCharacter height="200" v-bind:character="character"/>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
 
+<script>
+import { getCharacter } from "rickmortyapi"
+
+import CardCharacter from "@/components/CardCharacter"
+import NavBar from "./components/NavBar"
+import Search from "./components/Search"
 export default {
   name: 'App',
-  components: {
-    HelloWorld
-  }
-}
-</script>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-</style>
+  components: {
+    NavBar,
+    Search,
+    CardCharacter
+  },
+
+  data: () => ({
+    characters: [],
+    query: ""
+  }),
+  async mounted() {
+    const family = await getCharacter([1, 2, 3, 4, 5])
+    console.log("family", family)
+    this.characters = [...family]
+  },
+  watch: {
+    async query() {
+       if (this.query.length > 0) {
+        const allCharacters = await getCharacter({
+          name: this.query
+        })
+        console.log("allCharacters", allCharacters)
+        this.characters = [...allCharacters.results]
+      }
+    }
+  }
+};
+</script>
